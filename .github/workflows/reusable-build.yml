@@ -14,6 +14,11 @@ on:
         description: "The release tag for the bazzite kernel"
         required: false
         type: string
+      arch:
+        description: "The architecture to build for: x86_64, aarch64, etc"
+        required: false
+        default: x86_64
+        type: string
 env:
   IMAGE_BASE_NAME: akmods
   IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
@@ -24,8 +29,8 @@ concurrency:
 
 jobs:
   cache-kernel:
-    name: Kernel ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}
-    runs-on: ubuntu-24.04
+    name: Kernel ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}-${{ inputs.arch }}
+    runs-on: ${{ inputs.arch == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
     env:
       KCWD: /tmp/kernel-cache
       KCPATH: kernel_cache
@@ -48,6 +53,7 @@ jobs:
           fedora_version: ${{ inputs.fedora_version }}
           kernel_flavor: ${{ inputs.kernel_flavor }}
           bazzite_tag: ${{ inputs.bazzite_tag }}
+          arch: ${{ inputs.arch }}
 
       - name: Cache Kernel RPMs
         id: cache-kernel
@@ -145,8 +151,8 @@ jobs:
           find ${{ env.KCPATH }}
 
   build-akmods:
-    name: Akmods ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}-${{ matrix.cfile_suffix }}
-    runs-on: ubuntu-24.04 # Work Around Tar Bug
+    name: Akmods ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}-${{ matrix.cfile_suffix }}-${{ matrix.arch }}}}
+    runs-on: ${{ inputs.arch == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
     needs: [cache-kernel]
     permissions:
       contents: read
@@ -163,6 +169,8 @@ jobs:
           - nvidia
           - nvidia-open
           - zfs
+        arch:
+          - ${{ inputs.arch }}
         exclude:
           # extra
           - kernel_flavor: main
