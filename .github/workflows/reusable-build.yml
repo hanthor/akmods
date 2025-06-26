@@ -30,7 +30,7 @@ concurrency:
 jobs:
   cache-kernel:
     name: Kernel ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}-${{ inputs.arch }}
-    runs-on: ${ inputs.arch == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }
+    runs-on: ${{ inputs.arch == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
     env:
       KCWD: /tmp/kernel-cache
       KCPATH: kernel_cache
@@ -152,7 +152,7 @@ jobs:
 
   build-akmods:
     name: Akmods ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}-${{ matrix.cfile_suffix }}-${{ matrix.arch }}}}
-    runs-on: ${{ matrix.platform == 'amd64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
+    runs-on: ${{ inputs.arch == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
     needs: [cache-kernel]
     permissions:
       contents: read
