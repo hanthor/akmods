@@ -353,6 +353,13 @@ jobs:
             FEDORA_MAJOR_VERSION=${{ inputs.fedora_version }}
             RPMFUSION_MIRROR=${{ vars.RPMFUSION_MIRROR }}
             DUAL_SIGN=true
+            ${{ matrix.cfile_suffix == 'common' && format('KMODS_TO_BUILD={0}', 'framework-laptop kvmfr openrazer v4l2loopback wl xone') || '' }}
+            ${{ matrix.cfile_suffix == 'extra' && format('KMODS_TO_BUILD={0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}',
+              (contains(inputs.kernel_flavor, 'asus') && '' || 'zenergy evdi '),
+              (inputs.fedora_version >= 41 && 'gpd-fan ' || ''),
+              'ayaneo-platform ayn-platform bmi260 ',
+              (contains(inputs.kernel_flavor, 'bazzite') && '' || 'facetimehd rtl8814au rtl88xxau VirtualBox '),
+              'gcadapter_oc nct6687d system76 system76-io ryzen-smu vhba') || '' }}
           labels: ${{ steps.meta.outputs.labels }}
           oci: false
 
