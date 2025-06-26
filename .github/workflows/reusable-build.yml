@@ -29,8 +29,8 @@ concurrency:
 
 jobs:
   cache-kernel:
-    name: Kernel ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}
-    runs-on: ubuntu-24.04
+    name: Kernel ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}-${{ inputs.arch }}
+    runs-on: ${ inputs.arch == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }
     env:
       KCWD: /tmp/kernel-cache
       KCPATH: kernel_cache
@@ -53,6 +53,7 @@ jobs:
           fedora_version: ${{ inputs.fedora_version }}
           kernel_flavor: ${{ inputs.kernel_flavor }}
           bazzite_tag: ${{ inputs.bazzite_tag }}
+          arch: ${{ inputs.arch }}
 
       - name: Cache Kernel RPMs
         id: cache-kernel
@@ -150,7 +151,7 @@ jobs:
           find ${{ env.KCPATH }}
 
   build-akmods:
-    name: Akmods ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}-${{ matrix.cfile_suffix }}
+    name: Akmods ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}-${{ matrix.cfile_suffix }}-${{ matrix.arch }}}}
     runs-on: ${{ matrix.platform == 'amd64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
     needs: [cache-kernel]
     permissions:

@@ -1,5 +1,11 @@
 ---
 name: Get Kernel Version
+description: |
+  This action queries the Fedora Koji for the latest kernel version
+  based on the provided Fedora version and kernel flavor.
+  It supports various kernel flavors like asus, surface, bazzite, etc.
+  The action outputs the kernel build tag, major minor patch version,
+  and full kernel release version.
 inputs:
   fedora_version:
     description: "The Fedora release version: 41, 42, etc"
@@ -12,6 +18,11 @@ inputs:
   bazzite_tag:
     description: "Optional (bazzite kernel) tag to use instead of latest"
     required: false
+    type: string
+  arch:
+    description: "The architecture to build for: x86_64, aarch64, etc"
+    required: false
+    default: x86_64
     type: string
 outputs:
   kernel_build_tag:
@@ -113,7 +124,7 @@ runs:
             else
               latest="$(curl "https://api.github.com/repos/bazzite-org/kernel-bazzite/releases/latest" )"
             fi
-            linux=$(echo -E "$latest" | jq -r '.assets[].name' | grep -E 'kernel-.*.rpm' | grep "fc${{ inputs.fedora_version }}.x86_64" | head -1 | sed "s/kernel-//g" | sed "s/.rpm//g" )
+            linux=$(echo -E "$latest" | jq -r '.assets[].name' | grep -E 'kernel-.*.rpm' | grep "fc${{ inputs.fedora_version }}.${{ inputs.arch }}" | head -1 | sed "s/kernel-//g" | sed "s/.rpm//g" )
             build_tag=$(echo -E $latest | jq -r '.tag_name')
             ;;
           "surface")
