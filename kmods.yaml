@@ -1,0 +1,155 @@
+kmods:
+  common:
+    - name: framework-laptop
+      copr_url: "https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${RELEASE}/ublue-os-akmods-fedora-${RELEASE}.repo"
+      copr_repo_file: "_copr_ublue-os-akmods.repo"
+      mod_files:
+        - framework_laptop
+    - name: kvmfr
+      copr_url: "https://copr.fedorainfracloud.org/coprs/hikariknight/looking-glass-kvmfr/repo/fedora-${COPR_RELEASE}/hikariknight-looking-glass-kvmfr-fedora-${COPR_RELEASE}.repo"
+      copr_repo_file: "_copr_hikariknight-looking-glass-kvmfr.repo"
+      mod_files:
+        - kvmfr
+      conditions:
+        release_ge: 41
+        copr_release_rawhide: true
+    - name: openrazer
+      copr_url: "https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${RELEASE}/ublue-os-akmods-fedora-${RELEASE}.repo"
+      copr_repo_file: "_copr_ublue-os-akmods.repo"
+      mod_files:
+        - razerkbd
+        - razermouse
+        - razerkraken
+        - razeraccessory
+    - name: v4l2loopback
+      mod_files:
+        - v4l2loopback
+    - name: wl
+      mod_files:
+        - wl
+    - name: xone
+      copr_url: "https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${RELEASE}/ublue-os-akmods-fedora-${RELEASE}.repo"
+      copr_repo_file: "_copr_ublue-os-akmods.repo"
+      mod_files:
+        - xone-dongle
+        - xone-gip
+        - xone-gip-gamepad
+        - xone-gip-headset
+        - xone-gip-chatpad
+        - xone-gip-madcatz-strat
+        - xone-gip-madcatz-glam
+        - xone-gip-pdp-jaguar
+  extra:
+    - name: ayaneo-platform
+      copr_url: "https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${RELEASE}/ublue-os-akmods-fedora-${RELEASE}.repo"
+      copr_repo_file: "_copr_ublue-os-akmods.repo"
+      mod_files:
+        - ayaneo-platform
+    - name: ayn-platform
+      copr_url: "https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${RELEASE}/ublue-os-akmods-fedora-${RELEASE}.repo"
+      copr_repo_file: "_copr_ublue-os-akmods.repo"
+      mod_files:
+        - ayn-platform
+    - name: bmi260
+      copr_url: "https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${RELEASE}/ublue-os-akmods-fedora-${RELEASE}.repo"
+      copr_repo_file: "_copr_ublue-os-akmods.repo"
+      mod_files:
+        - bmi260_core
+        - bmi260_i2c
+    - name: evdi
+      copr_url: "https://negativo17.org/repos/fedora-multimedia.repo"
+      copr_repo_file: "negativo17-fedora-multimedia.repo"
+      mod_files:
+        - evdi
+      conditions:
+        fedora_major_version_ge: 42
+        dnf_search_displaylink_not_found: true
+        kernel_flavor_not_contains: "asus"
+      cflags: "-fno-pie -no-pie"
+    - name: facetimehd
+      copr_url: "https://copr.fedorainfracloud.org/coprs/mulderje/facetimehd-kmod/repo/fedora-${COPR_RELEASE}/mulderje-facetimehd-kmod-fedora-${COPR_RELEASE}.repo"
+      copr_repo_file: "_copr_mulderje-facetimehd-kmod.repo"
+      mod_files:
+        - facetimehd
+      conditions:
+        release_ge: 41
+        copr_release_rawhide: true
+        kernel_flavor_not_contains: "bazzite"
+    - name: gcadapter_oc
+      copr_url: "https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${RELEASE}/ublue-os-akmods-fedora-${RELEASE}.repo"
+      copr_repo_file: "_copr_ublue-os-akmods.repo"
+      mod_files:
+        - gcadapter_oc
+    - name: gpd-fan
+      copr_url: "https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${RELEASE}/ublue-os-akmods-fedora-${RELEASE}.repo"
+      copr_repo_file: "_copr_ublue-os-akmods.repo"
+      mod_files:
+        - gpd-fan
+      conditions:
+        fedora_major_version_ge: 41
+    - name: nct6687d
+      copr_url: "https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${RELEASE}/ublue-os-akmods-fedora-${RELEASE}.repo"
+      copr_repo_file: "_copr_ublue-os-akmods.repo"
+      mod_files:
+        - nct6687
+    - name: rtl8814au
+      copr_url: "https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${RELEASE}/ublue-os-akmods-fedora-${RELEASE}.repo"
+      copr_repo_file: "_copr_ublue-os-akmods.repo"
+      mod_files:
+        - rtl8814au
+      conditions:
+        kernel_not_contains: "6.8"
+        kernel_flavor_not_contains: "bazzite"
+    - name: rtl88xxau
+      copr_url: "https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${RELEASE}/ublue-os-akmods-fedora-${RELEASE}.repo"
+      copr_repo_file: "_copr_ublue-os-akmods.repo"
+      mod_files:
+        - 88XXau
+      conditions:
+        kernel_not_contains: "6.8"
+        kernel_flavor_not_contains: "bazzite"
+    - name: ryzen-smu
+      copr_url: "https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${RELEASE}/ublue-os-akmods-fedora-${RELEASE}.repo"
+      copr_repo_file: "_copr_ublue-os-akmods.repo"
+      mod_files:
+        - ryzen_smu
+    - name: system76-io
+      copr_url: "https://copr.fedorainfracloud.org/coprs/ssweeny/system76-hwe/repo/fedora-${COPR_RELEASE}/ssweeny-system76-hwe-fedora-${COPR_RELEASE}.repo"
+      copr_repo_file: "_copr_ssweeny-system76-io.repo"
+      mod_files:
+        - system76-io
+      conditions:
+        release_ge: 41
+        copr_release_rawhide: true
+    - name: system76
+      copr_url: "https://copr.fedorainfracloud.org/coprs/ssweeny/system76-hwe/repo/fedora-${COPR_RELEASE}/ssweeny-system76-hwe-fedora-${COPR_RELEASE}.repo"
+      copr_repo_file: "_copr_ssweeny-system76-hwe.repo"
+      mod_files:
+        - system76
+      conditions:
+        release_ge: 41
+        copr_release_rawhide: true
+    - name: vhba
+      copr_url: "https://copr.fedorainfracloud.org/coprs/rok/cdemu/repo/fedora-${COPR_RELEASE}/rok-cdemu-fedora-${COPR_RELEASE}.repo"
+      copr_repo_file: "_copr_rok-cdemu.repo"
+      mod_files:
+        - vhba
+      conditions:
+        release_ge: 43
+        copr_release_rawhide: true
+    - name: VirtualBox
+      mod_files:
+        - vboxdrv
+        - vboxnetadp
+        - vboxnetflt
+    - name: zenergy
+      copr_url: "https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${RELEASE}/ublue-os-akmods-fedora-${RELEASE}.repo"
+      copr_repo_file: "_copr_ublue-os-akmods.repo"
+      mod_files:
+        - zenergy
+      conditions:
+        kernel_flavor_not_contains: "asus"
+  nvidia:
+    - name: nvidia
+  zfs:
+    - name: zfs

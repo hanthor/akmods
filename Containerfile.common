@@ -14,6 +14,7 @@ ARG DUAL_SIGN="true"
 ARG KMODS_TO_BUILD=""
 
 COPY build_files/common build_files/shared /tmp/
+COPY kmods.yaml /tmp/kmods.yaml
 COPY certs /tmp/certs
 
 # files for akmods
