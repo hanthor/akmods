@@ -146,7 +146,7 @@ jobs:
 
   build-akmods:
     name: Akmods ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}-${{ matrix.cfile_suffix }}
-    runs-on: ubuntu-24.04 # Work Around Tar Bug
+    runs-on: ${{ matrix.platform == 'amd64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
     needs: [cache-kernel]
     permissions:
       contents: read
@@ -163,6 +163,8 @@ jobs:
           - nvidia
           - nvidia-open
           - zfs
+        arch:
+          - ${{ inputs.arch }}
         exclude:
           # extra
           - kernel_flavor: main
