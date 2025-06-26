@@ -10,20 +10,16 @@ inputs:
   fedora_version:
     description: "The Fedora release version: 41, 42, etc"
     required: true
-    type: string
   kernel_flavor:
     description: "The Kernel flavor: main, bazzite, coreos-stable, etc"
     required: true
-    type: string
   bazzite_tag:
     description: "Optional (bazzite kernel) tag to use instead of latest"
     required: false
-    type: string
   arch:
     description: "The architecture to build for: x86_64, aarch64, etc"
     required: false
     default: x86_64
-    type: string
 outputs:
   kernel_build_tag:
     description: "Optional (bazzite specific) tag"
