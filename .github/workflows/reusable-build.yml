@@ -337,6 +337,22 @@ jobs:
             wc -c certs/private_key_2.priv
           fi
 
+      - name: Get KMODS_TO_BUILD for common
+        id: get-common-kmods
+        if: matrix.cfile_suffix == 'common'
+        shell: bash
+        run: |
+          KMODS=$(bash -c "/tmp/get_kmods_to_build.sh common ${{ inputs.fedora_version }} ${{ inputs.kernel_flavor }}")
+          echo "kmods_to_build=$KMODS" >> $GITHUB_OUTPUT
+
+      - name: Get KMODS_TO_BUILD for extra
+        id: get-extra-kmods
+        if: matrix.cfile_suffix == 'extra'
+        shell: bash
+        run: |
+          KMODS=$(bash -c "/tmp/get_kmods_to_build.sh extra ${{ inputs.fedora_version }} ${{ inputs.kernel_flavor }}")
+          echo "kmods_to_build=$KMODS" >> $GITHUB_OUTPUT
+
       # Build image using Buildah action
       - name: Build Image
         id: build_image
@@ -353,8 +369,8 @@ jobs:
             FEDORA_MAJOR_VERSION=${{ inputs.fedora_version }}
             RPMFUSION_MIRROR=${{ vars.RPMFUSION_MIRROR }}
             DUAL_SIGN=true
-            ${{ matrix.cfile_suffix == 'common' && format('KMODS_TO_BUILD={0}', run('bash -c "/tmp/get_kmods_to_build.sh common ${{ inputs.fedora_version }} ${{ inputs.kernel_flavor }}"')) || '' }}
-            ${{ matrix.cfile_suffix == 'extra' && format('KMODS_TO_BUILD={0}', run('bash -c "/tmp/get_kmods_to_build.sh extra ${{ inputs.fedora_version }} ${{ inputs.kernel_flavor }}"')) || '' }}
+            ${{ matrix.cfile_suffix == 'common' && format('KMODS_TO_BUILD={0}', steps.get-common-kmods.outputs.kmods_to_build) || '' }}
+            ${{ matrix.cfile_suffix == 'extra' && format('KMODS_TO_BUILD={0}', steps.get-extra-kmods.outputs.kmods_to_build) || '' }}
           labels: ${{ steps.meta.outputs.labels }}
           oci: false
 
