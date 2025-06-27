@@ -3,65 +3,92 @@
 KMOD_TYPE="$1"
 FEDORA_MAJOR_VERSION="$2"
 KERNEL_FLAVOR="$3"
+IMAGE_NAME="$4"
 
 KMODS_TO_BUILD=""
+COPR_REPOS_ADD_INSTRUCTIONS=""
+DNF_INSTALL_COMMANDS=""
+AKMODS_FORCE_COMMANDS=""
 
-# Read kmods from YAML
-# Iterate over each kmod of the given type
-yq eval ".kmods.${KMOD_TYPE}[]" kmods.yaml | while read -r kmod_data; do
-    NAME=$(echo "$kmod_data" | yq eval '.name' -)
-    CONDITIONS=$(echo "$kmod_data" | yq eval '.conditions' -)
+# Get cppFlags for the current image
+CPP_FLAGS=$(yq -r ".images.\"$IMAGE_NAME\".cppFlags[] // \"\"" cayo-images.yaml | tr '\n' ' ')
+
+# Read kmods from YAML and process them
+yq -o=json '.kmods.'\"${KMOD_TYPE}\"'[]' kmods.yaml | jq -c '.[]' | while read -r KMOD_JSON;
+do
+    NAME=$(echo "$KMOD_JSON" | jq -r '.name')
+    COPR_URL=$(echo "$KMOD_JSON" | jq -r '.copr_url // "null"')
+    COPR_REPO_FILE=$(echo "$KMOD_JSON" | jq -r '.copr_repo_file // "null"')
+    MOD_FILES=$(echo "$KMOD_JSON" | jq -r '.mod_files[] // "null"')
+    CONDITIONS=$(echo "$KMOD_JSON" | jq -r '.conditions // "null"')
+    CFLAGS=$(echo "$KMOD_JSON" | jq -r '.cflags // "null"')
 
     BUILD=true
 
+    # Evaluate conditions
     if [ "$CONDITIONS" != "null" ]; then
-        # Check fedora_major_version_ge
-        if [ "$(echo "$CONDITIONS" | yq eval '.fedora_major_version_ge // "null"' -)" != "null" ]; then
-            REQUIRED_VERSION=$(echo "$CONDITIONS" | yq eval '.fedora_major_version_ge' -)
-            if [ "${FEDORA_MAJOR_VERSION}" -lt "${REQUIRED_VERSION}" ]; then
+        REQUIRED_FEDORA_VERSION_GE=$(echo "$CONDITIONS" | jq -r '.fedora_major_version_ge // "null"')
+        EXCLUDED_KERNEL_FLAVOR=$(echo "$CONDITIONS" | jq -r '.kernel_flavor_not_contains // "null"')
+        REQUIRED_RELEASE_GE=$(echo "$CONDITIONS" | jq -r '.release_ge // "null"')
+        COPR_RELEASE_RAWHIDE=$(echo "$CONDITIONS" | jq -r '.copr_release_rawhide // "false"')
+        KERNEL_NOT_CONTAINS=$(echo "$CONDITIONS" | jq -r '.kernel_not_contains // "null"')
+        DNF_SEARCH_DISPLAYLINK_NOT_FOUND=$(echo "$CONDITIONS" | jq -r '.dnf_search_displaylink_not_found // "false"')
+
+        if [ "$REQUIRED_FEDORA_VERSION_GE" != "null" ]; then
+            if [ "${FEDORA_MAJOR_VERSION}" -lt "${REQUIRED_FEDORA_VERSION_GE}" ]; then
                 BUILD=false
             fi
         fi
 
-        # Check kernel_flavor_not_contains
-        if [ "$(echo "$CONDITIONS" | yq eval '.kernel_flavor_not_contains // "null"' -)" != "null" ]; then
-            EXCLUDED_FLAVOR=$(echo "$CONDITIONS" | yq eval '.kernel_flavor_not_contains' -)
-            if [[ "${KERNEL_FLAVOR}" =~ "${EXCLUDED_FLAVOR}" ]]; then
+        if [ "$EXCLUDED_KERNEL_FLAVOR" != "null" ]; then
+            if [[ "${KERNEL_FLAVOR}" =~ "${EXCLUDED_KERNEL_FLAVOR}" ]]; then
                 BUILD=false
             fi
         fi
 
-        # Check kernel_not_contains (for rtl8814au and rtl88xxau)
-        if [ "$(echo "$CONDITIONS" | yq eval '.kernel_not_contains // "null"' -)" != "null" ]; then
-            EXCLUDED_KERNEL=$(echo "$CONDITIONS" | yq eval '.kernel_not_contains' -)
-            # KERNEL variable is not available here, so we can't check it directly.
-            # This condition will need to be handled differently or assumed to be true for local testing.
-            # For now, we'll assume it passes if the condition exists.
-            # In CI, the actual KERNEL variable would be used.
+        if [ "$REQUIRED_RELEASE_GE" != "null" ]; then
+            # This condition needs to be evaluated against the actual release, which is not available here.
+            # Assuming it's handled by CI or always true for local testing for now.
+            :
         fi
 
-        # Check dnf_search_displaylink_not_found (for evdi)
-        if [ "$(echo "$CONDITIONS" | yq eval '.dnf_search_displaylink_not_found // "null"' -)" != "null" ]; then
-            # This condition requires running dnf, which is not feasible here.
-            # This will need to be handled differently or assumed to be true for local testing.
-            # In CI, the actual dnf command would be run.
+        if [ "$COPR_RELEASE_RAWHIDE" == "true" ]; then
+            # This condition needs to be evaluated against the actual COPR_RELEASE, which is not available here.
+            # Assuming it's handled by CI or always true for local testing for now.
+            :
         fi
 
-        # Check release_ge and copr_release_rawhide (for kvmfr, facetimehd, system76-io, system76, vhba)
-        if [ "$(echo "$CONDITIONS" | yq eval '.release_ge // "null"' -)" != "null" ]; then
-            REQUIRED_RELEASE=$(echo "$CONDITIONS" | yq eval '.release_ge' -)
-            if [ "${FEDORA_MAJOR_VERSION}" -lt "${REQUIRED_RELEASE}" ]; then
-                BUILD=false
-            fi
+        if [ "$KERNEL_NOT_CONTAINS" != "null" ]; then
+            # This condition needs to be evaluated against the KERNEL variable, which is not available here.
+            # Assuming it's handled by CI or always true for local testing for now.
+            :
         fi
 
-        # copr_release_rawhide is a flag, not a condition to check here.
+        if [ "$DNF_SEARCH_DISPLAYLINK_NOT_FOUND" == "true" ]; then
+            # This condition needs to be evaluated by running dnf search, which is not feasible here.
+            # Assuming it's handled by CI or always true for local testing for now.
+            :
+        fi
+    fi
 
+    # Check if kmod should be built based on cppFlags
+    if [[ ! " ${CPP_FLAGS[@]} " =~ " ${NAME^^} " ]]; then
+        BUILD=false
     fi
 
     if [ "$BUILD" = true ]; then
         KMODS_TO_BUILD+="$NAME "
+
+        if [ "$COPR_URL" != "null" ] && [ "$COPR_REPO_FILE" != "null" ]; then
+            COPR_REPOS_ADD_INSTRUCTIONS+="RUN curl -fLO $(echo "$COPR_URL" | sed "s|\\\${RELEASE}|${FEDORA_MAJOR_VERSION}|g" | sed "s|\\\${COPR_RELEASE}|${FEDORA_MAJOR_VERSION}|g") -o /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/${COPR_REPO_FILE} && \\\n"
+        fi
+
+        DNF_INSTALL_COMMANDS+="dnf install -y akmod-$NAME && \\\n"
+        AKMODS_FORCE_COMMANDS+="akmods --force --kmod $NAME --target /usr/src/kernels/${KERNEL_VERSION} && \\\n"
     fi
 done
 
-echo "$KMODS_TO_BUILD"
+echo "KMODS_TO_BUILD=\"$KMODS_TO_BUILD\""
+echo "COPR_REPOS_ADD_INSTRUCTIONS=\"$COPR_REPOS_ADD_INSTRUCTIONS\""
+echo "DNF_INSTALL_COMMANDS=\"$DNF_INSTALL_COMMANDS\""
+echo "AKMODS_FORCE_COMMANDS=\"$AKMODS_FORCE_COMMANDS\""

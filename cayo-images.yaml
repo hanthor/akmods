@@ -1,0 +1,52 @@
+---
+centos-10: &centos-10
+  # TODO: Implement a Renovate Regex
+  source: quay.io/centos-bootc/centos-bootc:c10s
+  version: 10
+cayo: &cayo
+  org: ublue-os
+  registry: ghcr.io
+  repo: cayo
+  cppFlags: []
+cayo-base: &cayo-base
+  <<: *cayo
+  name: cayo
+cayo-hci: &cayo-hci
+  <<: *cayo
+  name: cayo-hci
+  cppFlags: [ HCI ]
+
+images:
+  cayo-base-main-10:
+    !!merge <<: 
+      - *centos-10
+      - *cayo-base
+    description: "A bootc server image with ZFS included"
+  cayo-hci-main-10:
+    !!merge <<: 
+      - *centos-10
+      - *cayo-hci
+    description: "A bootc Hyper-Converged Infrastructure image with ZFS included"
+  cayo-base-nvidia-10:
+    !!merge <<: 
+      - *centos-10
+      - *cayo-base
+    cppFlags: [ NVIDIA ]
+    description: "A bootc server image with ZFS and NVIDIA included"
+    name: cayo-nvidia
+  cayo-hci-nvidia-10:
+    !!merge <<: 
+      - *centos-10
+      - *cayo-hci
+    cppFlags: [ HCI, NVIDIA ]
+    description: "A bootc Hyper-Converged Infrastructure image with ZFS and NVIDIA included"
+    name: cayo-hci-nvidia
+  rechunker:
+    # TODO: Add Renovate Regex configuration
+    source: ghcr.io/hhd-dev/rechunk:v1.2.2@sha256:e799d89f9a9965b5b0e89941a9fc6eaab62e9d2d73a0bfb92e6a495be0706907
+  bootc-image-builder:
+    # TODO: Add Renovate Regex configuration
+    source: quay.io/centos-bootc/bootc-image-builder:latest
+  qemu:
+    # TODO: Add Renovate Regex configuration
+    source: ghcr.io/qemus/qemu:7.12@sha256:ab767a6b9c8cf527d521eee9686dce09933bc35599ee58be364eb8f3a03001ea

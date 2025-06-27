@@ -1,7 +1,3 @@
-###
-### Containerfile.extra - used to build extra kmods
-###
-
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-42}"
 ARG BUILDER_IMAGE="${BUILDER_IMAGE:-quay.io/fedora/fedora}"
 ARG BUILDER_BASE="${BUILDER_IMAGE}:${FEDORA_MAJOR_VERSION}"
@@ -11,17 +7,15 @@ ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-42}"
 ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-main}"
 ARG RPMFUSION_MIRROR=""
 ARG DUAL_SIGN="true"
+
 ARG KMODS_TO_BUILD=""
 
-COPY build_files/extra build_files/shared /tmp/
+COPY build_files/common build_files/shared /tmp/
 COPY kmods.yaml /tmp/kmods.yaml
 COPY certs /tmp/certs
 
-# files for akmods
-ADD https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${FEDORA_MAJOR_VERSION}/ublue-os-akmods-fedora-${FEDORA_MAJOR_VERSION}.repo \
-    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
-ADD https://negativo17.org/repos/fedora-multimedia.repo \
-    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
+# KMOD_COPR_REPOS_ADD_INSTRUCTIONS
+# This section will be populated by get_kmods_to_build.sh with ADD instructions for COPR repos.
 
 RUN --mount=type=bind,src=kernel_cache,dst=/tmp/kernel_cache,ro \
     --mount=type=cache,dst=/var/cache/dnf \
@@ -32,9 +26,16 @@ RUN --mount=type=bind,src=kernel_cache,dst=/tmp/kernel_cache,ro \
         export KERNEL_NAME="kernel-surface" \
     ; fi && \
     /tmp/build-prep.sh && \
-    for kmod in ${KMODS_TO_BUILD}; do \
-        /tmp/build-kmod-${kmod}.sh; \
-    done && \
+    if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then \
+      /tmp/build-ublue-os-ucore-addons.sh && \
+      cp /tmp/ublue-os-ucore-addons/rpmbuild/RPMS/noarch/ublue-os-ucore-addons*.rpm \
+        /var/cache/rpms/ucore/ \
+    ; fi && \
+    /tmp/build-ublue-os-akmods-addons.sh && \
+    cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
+      /var/cache/rpms/ublue-os/ && \
+    # KMOD_INSTALL_AND_BUILD_COMMANDS
+    # This section will be populated by get_kmods_to_build.sh with dnf install and akmods --force commands.
     /tmp/dual-sign.sh && \
     /tmp/build-post.sh
 

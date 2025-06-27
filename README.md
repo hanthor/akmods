@@ -1,69 +1,19 @@
 # ublue-os akmods
 
-[![build-bazzite](https://github.com/ublue-os/akmods/actions/workflows/build-bazzite.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-bazzite.yml) [![build-41](https://github.com/ublue-os/akmods/actions/workflows/build-41.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-41.yml) [![build-42](https://github.com/ublue-os/akmods/actions/workflows/build-42.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-42.yml)
-
 OCI images providing a set of cached kernel RPMs and extra kernel modules to Universal Blue images. Used for better hardware support and consistent build process.
 
 ## How it's organized
 
-The [`akmods` image](https://github.com/orgs/ublue-os/packages/container/package/akmods) is built and published daily. However, there's not a single image but several, given various kernels we now support.
-
-The akmods packages are divided up for building in a few different "groups":
-
-- `common` - any kmod installed by default in Bluefin/Aurora (or were originally in main images pre-Fedora 39)
-- `extra` - any kmods used by Bazzite but not Bluefine/Aurora
-- `nvidia` - only the nvidia proprietary kmod and addons
-- `nvidia-open` - only the nvidia-open kmod and addons
-- `zfs` - only the zfs kmod and utilities built for select kernels
-
-Each of these images contains a cached copy of the respective kernel RPMs compatible with the respective kmods for the image.
-
-Builds also run for different kernels:
-
-- `bazzite` - Bazzite [builds a kernel with gaming specific patches](https://github.com/bazzite-org/kernel-bazzite) for the current release of Fedora
-- `ublue 41` - Fedora 41 kernel builds:
-  - `main` - current default kernel version
-  - `coreos-stable` - current Fedora CoreOS stable kernel version
-  - `coreos-testing` - current Fedora CoreOS testing kernel version
-- `ublue 42` - Fedora 42 kernel builds:
-  - `main` - current default kernel version
-  - `coreos-stable` - current Fedora CoreOS stable kernel version
-  - `coreos-testing` - current Fedora CoreOS testing kernel version
-
-This table shows what groups build for which kernel and Fedora release:
-
-| Build | Kernel | akmods group |
-|-------|--------|--------------|
-| bazzite | bazzite | common |
-| bazzite | bazzite | extra |
-| bazzite | bazzite | nvidia |
-| bazzite | bazzite | nvidia-open |
-| 41 | main | common |
-| 41 | main | nvidia |
-| 41 | main | nvidia-open |
-| 41 | coreos-stable | common |
-| 41 | coreos-stable | nvidia |
-| 41 | coreos-stable | nvidia-open |
-| 41 | coreos-stable | zfs |
-| 42 | main | common |
-| 42 | main | nvidia |
-| 42 | main | nvidia-open |
-| 42 | coreos-stable | common |
-| 42 | coreos-stable | nvidia |
-| 42 | coreos-stable | nvidia-open |
-| 42 | coreos-stable | zfs |
+The `akmods` images are built and published daily. There are several images, each tailored for specific kernel flavors and kmod groups, as defined in `kmods.yaml` and `cayo-images.yaml`.
 
 ## Features
 
 ### Overview
 
-The `common` images contain related kmod packages, plus:
+The images contain relevant kmod packages and support packages:
 
 - `ublue-os-akmods-addons` - installs extra repos and our kmods signing key; install and import to allow SecureBoot systems to use these kmods
 - `ublue-os-ucore-addons` - a slightly lighter `ublue-os-akmods-addons` for CoreOS/uCore systems
-
-The `nvidia` and `nvidia-open` images contains
-
 - `ublue-os-nvidia-addons` - installs extra repos enabling our nvidia support
   - [nvidia container selinux policy](https://github.com/NVIDIA/dgx-selinux/tree/master/src/nvidia-container-selinux) - uses RHEL9 policy as the closest match
   - [nvidia-container-tookkit repo](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installing-with-yum-or-dnf) - version 1.14 (and newer) provide CDI for podman use of nvidia gpus
