@@ -35,7 +35,6 @@ RUN --mount=type=bind,src=kernel_cache,dst=/tmp/kernel_cache,ro \
     cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
       /var/cache/rpms/ublue-os/ && \
     # KMOD_INSTALL_AND_BUILD_COMMANDS
-    # This section will be populated by get_kmods_to_build.sh with dnf install and akmods --force commands.
     /tmp/dual-sign.sh && \
     /tmp/build-post.sh
 

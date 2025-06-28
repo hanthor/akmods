@@ -11,8 +11,6 @@ DNF_INSTALL_COMMANDS=""
 AKMODS_FORCE_COMMANDS=""
 
 # Get cppFlags for the current image
-CPP_FLAGS=$(yq -r ".images.\"$IMAGE_NAME\".cppFlags[] // \"\"" cayo-images.yaml | tr '\n' ' ')
-
 # Read kmods from YAML and process them
 yq -o=json '.kmods.'\"${KMOD_TYPE}\"'[]' kmods.yaml | jq -c '.[]' | while read -r KMOD_JSON;
 do
