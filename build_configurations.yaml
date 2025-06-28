@@ -1,0 +1,54 @@
+platforms:
+  - amd64:
+      default: true
+      alt_name: x86_64
+  - amd64/v2:
+      default: false
+      alt_name: x86_64_v2
+  - arm64:
+      default: true
+      alt_name: aarch64
+distros:
+  centos:
+    image: quay.io/centos-bootc/centos-bootc
+    versions:
+      - stream10
+  almalinux-kitten:
+    image: quay.io/almalinuxorg/almalinux-bootc
+    versions:
+      - 10-kitten
+    extra_platforms: amd64/v2
+  almalinux:
+    image: quay.io/almalinuxorg/almalinux-bootc
+    versions:
+      - 10
+    extra_platforms: amd64/v2
+  fedora:
+    image: quay.io/fedora/fedora-bootc
+    versions:
+      - 42
+      - rawhide
+kmods:
+  common:
+    - framework-laptop
+    - kvmfr
+    - openrazer
+    - v4l2loopback
+    - wl
+    - xone
+  extra:
+    - ayaneo-platform
+    - ayn-platform
+    - bmi260
+    - evdi
+    - gcadapter_oc
+    - gpd-fan
+    - nct6687d
+    - ryzen-smu
+    - system76
+    - system76-io
+    - zenergy
+  nvidia:
+    - nvidia
+  zfs:
+    - zfs
