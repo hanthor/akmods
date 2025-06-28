@@ -1,2 +1,5 @@
 certs/private_key.priv.prod
 certs/public_key.der.prod
+
+# Python cache directories
+__pycache__/
