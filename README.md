@@ -4,7 +4,9 @@ OCI images providing a set of cached kernel RPMs and extra kernel modules to Uni
 
 ## How it's organized
 
-The `akmods` images are built and published daily. There are several images, each tailored for specific kernel flavors and kmod groups, as defined in `kmods.yaml` and `cayo-images.yaml`.
+The `akmods` images are built and published daily. The build matrix, defining combinations of distributions, platforms, and kmod groups, is configured in `build_configurations.yaml`.
+
+Each image is tailored for specific kernel flavors and kmod groups, as defined in `kmods.yaml`
 
 ## Features
 

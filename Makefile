@@ -5,7 +5,9 @@ FEDORA_MAJOR_VERSION ?= 42
 KERNEL_FLAVOR ?= main
 ARCH ?= x86_64
 
-.PHONY: kernel build-kmods default help
+PYTHON := ./.venv/bin/python3
+
+.PHONY: venv kernel build-kmods list-build-matrix default help
 
 # Recipe to build the kernel
 kernel:
@@ -28,12 +30,14 @@ kernel:
 # Generic recipe to build akmods based on KMOD_TYPE and IMAGE_NAME
 build-kmods: kernel
 	@echo "Building $(KMOD_TYPE) akmods for image $(IMAGE_NAME) on Fedora $(FEDORA_MAJOR_VERSION) (Kernel: $(KERNEL_FLAVOR), Arch: $(ARCH))"
-	$(eval KMOD_VARS := $(shell ./build_files/shared/get_kmods_to_build.sh $(KMOD_TYPE) $(FEDORA_MAJOR_VERSION) $(KERNEL_FLAVOR) $(IMAGE_NAME)))
+	$(eval KMOD_VARS := $(shell PATH=./.venv/bin:$PATH ./.venv/bin/python3 ./build_files/shared/get_kmods_to_build.py $(KMOD_TYPE) $(FEDORA_MAJOR_VERSION) $(KERNEL_FLAVOR) $(IMAGE_NAME)))
 	$(foreach VAR,$(KMOD_VARS),$(eval $(VAR)))
 	
+	$(eval CPP_DEFINES := $(shell PATH=./.venv/bin:$PATH ./.venv/bin/python3 ./build_files/shared/generate_cpp_defines.py build_configurations.yaml))
 	cat Containerfile.in | \
 		sed "s|# KMOD_COPR_REPOS_ADD_INSTRUCTIONS|$(COPR_REPOS_ADD_INSTRUCTIONS)|g" | \
 		sed "s|# KMOD_INSTALL_AND_BUILD_COMMANDS|$(DNF_INSTALL_COMMANDS)$(AKMODS_FORCE_COMMANDS)|g" | \
+		cpp -P - \
 		podman build \
 		--build-arg FEDORA_MAJOR_VERSION=$(FEDORA_MAJOR_VERSION) \
 		--build-arg KERNEL_FLAVOR=$(KERNEL_FLAVOR) \
@@ -45,9 +49,18 @@ build-kmods: kernel
 # Default recipe (lists available recipes)
 default: help
 
+venv:
+	@echo "Setting up Python virtual environment..."
+	@uv venv
+
+list-build-matrix: venv
+	@echo "Listing potential images from build_configurations.yaml:"
+	@$(PYTHON) ./build_files/shared/list_images.py build_configurations.yaml
+
 help:
 	@echo "Available recipes:"
 	@echo "  kernel                                 ## Fetches and builds the kernel"
 	@echo "  build-kmods KMOD_TYPE=<type> IMAGE_NAME=<name> ## Builds akmods for a specific type (e.g., common, extra, nvidia, zfs) and image (e.g., cayo-base-main-10)"
+	@echo "  list-build-matrix                      ## Lists potential images based on build_configurations.yaml"
 	@echo "  help                                   ## Displays this help message"
 
