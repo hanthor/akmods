@@ -16,9 +16,15 @@ ZFS_MINOR_VERSION="${ZFS_MINOR_VERSION:-}"
 cd /tmp
 
 # Use cURL to fetch the given URL, saving the response to `data.json`
-curl "https://api.github.com/repos/openzfs/zfs/releases" -o data.json
+# Retry the curl command up to 3 times
+for i in $(seq 1 3); do
+    curl "https://api.github.com/repos/openzfs/zfs/releases" -o data.json && break
+    echo "Curl of ZFS releases failed, retrying in 5 seconds... (Attempt $i/3)"
+    sleep 5
+done
 ZFS_VERSION=$(jq -r --arg ZMV "zfs-${ZFS_MINOR_VERSION}" '[ .[] | select(.prerelease==false and .draft==false) | select(.tag_name | startswith($ZMV))][0].tag_name' data.json|cut -f2- -d-)
 echo "ZFS_VERSION==$ZFS_VERSION"
+
 
 
 ### zfs specific build deps

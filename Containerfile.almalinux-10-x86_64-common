@@ -1,0 +1,41 @@
+ARG MAJOR_VERSION="${MAJOR_VERSION:-42}"
+ARG BUILDER_IMAGE="${BUILDER_IMAGE:-quay.io/fedora/fedora}"
+ARG BUILDER_BASE="${BUILDER_IMAGE}:${MAJOR_VERSION}"
+FROM ${BUILDER_BASE} AS builder
+
+ARG MAJOR_VERSION="${MAJOR_VERSION:-42}"
+ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-main}"
+ARG RPMFUSION_MIRROR=""
+ARG DUAL_SIGN="true"
+
+ARG KMODS_TO_BUILD=""
+
+COPY build_files/common build_files/shared /tmp/
+COPY kmods.yaml /tmp/kmods.yaml
+COPY certs /tmp/certs
+
+RUN --mount=type=bind,src=kernel_cache,dst=/tmp/kernel_cache,ro \
+    --mount=type=cache,dst=/var/cache/dnf \
+    ls -sh /tmp/kernel_cache; \
+    if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
+        export KERNEL_NAME="kernel" \
+    ; else \
+        export KERNEL_NAME="kernel-surface" \
+    ; fi && \
+    /tmp/build-prep.sh && \
+    if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then \
+      /tmp/build-ublue-os-ucore-addons.sh && \
+      cp /tmp/ublue-os-ucore-addons/rpmbuild/RPMS/noarch/ublue-os-ucore-addons*.rpm \
+        /var/cache/rpms/ucore/ \
+    ; fi && \
+    /tmp/build-ublue-os-akmods-addons.sh && \
+    cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
+      /var/cache/rpms/ublue-os/ && \
+    set -x && /tmp/build-kmod.sh framework-laptop && /tmp/build-kmod.sh kvmfr && /tmp/build-kmod.sh openrazer && /tmp/build-kmod.sh v4l2loopback && /tmp/build-kmod.sh wl && /tmp/build-kmod.sh xone
+    /tmp/dual-sign.sh && \
+    /tmp/build-post.sh
+
+FROM scratch
+
+COPY --from=builder /var/cache/kernel-rpms /kernel-rpms
+COPY --from=builder /var/cache/rpms /rpms
