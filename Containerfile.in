@@ -1,9 +1,9 @@
-ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-42}"
+ARG MAJOR_VERSION="${MAJOR_VERSION:-42}"
 ARG BUILDER_IMAGE="${BUILDER_IMAGE:-quay.io/fedora/fedora}"
-ARG BUILDER_BASE="${BUILDER_IMAGE}:${FEDORA_MAJOR_VERSION}"
+ARG BUILDER_BASE="${BUILDER_IMAGE}:${MAJOR_VERSION}"
 FROM ${BUILDER_BASE} AS builder
 
-ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-42}"
+ARG MAJOR_VERSION="${MAJOR_VERSION:-42}"
 ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-main}"
 ARG RPMFUSION_MIRROR=""
 ARG DUAL_SIGN="true"
@@ -13,9 +13,6 @@ ARG KMODS_TO_BUILD=""
 COPY build_files/common build_files/shared /tmp/
 COPY kmods.yaml /tmp/kmods.yaml
 COPY certs /tmp/certs
-
-# KMOD_COPR_REPOS_ADD_INSTRUCTIONS
-# This section will be populated by get_kmods_to_build.sh with ADD instructions for COPR repos.
 
 RUN --mount=type=bind,src=kernel_cache,dst=/tmp/kernel_cache,ro \
     --mount=type=cache,dst=/var/cache/dnf \

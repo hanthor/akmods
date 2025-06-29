@@ -62,7 +62,7 @@ kmods:
       mod_files:
         - evdi
       conditions:
-        fedora_major_version_ge: 42
+        MAJOR_VERSION_ge: 42
         dnf_search_displaylink_not_found: true
         kernel_flavor_not_contains: "asus"
       cflags: "-fno-pie -no-pie"
@@ -86,7 +86,7 @@ kmods:
       mod_files:
         - gpd-fan
       conditions:
-        fedora_major_version_ge: 41
+        MAJOR_VERSION_ge: 41
     - name: nct6687d
       copr_url: "https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${RELEASE}/ublue-os-akmods-fedora-${RELEASE}.repo"
       copr_repo_file: "_copr_ublue-os-akmods.repo"

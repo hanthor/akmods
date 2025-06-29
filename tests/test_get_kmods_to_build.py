@@ -18,7 +18,7 @@ def mock_kmods_config():
                 {
                     'name': 'evdi',
                     'conditions': {
-                        'fedora_major_version_ge': 42,
+                        'MAJOR_VERSION_ge': 42,
                         'kernel_flavor_not_contains': 'asus',
                     },
                 },
@@ -38,7 +38,7 @@ def test_get_kmods_to_build_extra_met_conditions(mock_kmods_config):
             result = get_kmods_to_build('extra', '42', 'generic', 'some-image')
             assert result == ['evdi']
 
-def test_get_kmods_to_build_extra_unmet_fedora_version(mock_kmods_config):
+def test_get_kmods_to_build_extra_unmet_major_version(mock_kmods_config):
     with patch('builtins.open', mock_open(read_data="")):
         with patch('yaml.safe_load', return_value=mock_kmods_config):
             result = get_kmods_to_build('extra', '41', 'generic', 'some-image')
@@ -54,12 +54,12 @@ def test_meets_conditions_no_conditions():
     kmod = {'name': 'test-kmod'}
     assert meets_conditions(kmod, '42', 'generic', 'some-image') is True
 
-def test_meets_conditions_fedora_version_ge_met():
-    kmod = {'name': 'test-kmod', 'conditions': {'fedora_major_version_ge': 42}}
+def test_meets_conditions_major_version_ge_met():
+    kmod = {'name': 'test-kmod', 'conditions': {'MAJOR_VERSION_ge': 42}}
     assert meets_conditions(kmod, '42', 'generic', 'some-image') is True
 
-def test_meets_conditions_fedora_version_ge_unmet():
-    kmod = {'name': 'test-kmod', 'conditions': {'fedora_major_version_ge': 43}}
+def test_meets_conditions_major_version_ge_unmet():
+    kmod = {'name': 'test-kmod', 'conditions': {'MAJOR_VERSION_ge': 43}}
     assert meets_conditions(kmod, '42', 'generic', 'some-image') is False
 
 def test_meets_conditions_kernel_flavor_not_contains_met():

@@ -15,7 +15,7 @@ def list_images(config_file):
     for distro, details in config['distros'].items():
         for version in details['versions']:
             for platform, alt_name in platforms.items():
-                if distro.startswith('almalinux') and 'extra_platforms' in details and platform not in details['extra_platforms']:
+                if distro and 'extra_platforms' in details and platform not in details['extra_platforms']:
                     continue
                 for kmod_group in config['kmods']:
                     images.append(f"{distro}-{version}-{alt_name}-{kmod_group}")

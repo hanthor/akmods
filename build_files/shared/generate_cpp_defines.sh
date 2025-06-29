@@ -56,7 +56,7 @@ do
 }
 
 # Generate defines for Fedora
-generate_defines "fedora" "$FEDORA_VERSIONS" "$PLATFORMS" "$KMOD_GROUPS"
+generate_defines "fedora" "$MAJOR_VERSIONS" "$PLATFORMS" "$KMOD_GROUPS"
 
 # Generate defines for CentOS
 generate_defines "centos" "$CENTOS_VERSIONS" "$PLATFORMS" "$KMOD_GROUPS"

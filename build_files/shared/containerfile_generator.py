@@ -1,8 +1,11 @@
 import os
 
 class ContainerfileGenerator:
-    def __init__(self, image_name, kmods_to_build, containerfile_in_path='Containerfile.in'):
-        self.image_name = image_name
+    def __init__(self, distro, version, arch, kmod_group, kmods_to_build, containerfile_in_path='Containerfile.in'):
+        self.distro = distro
+        self.version = version
+        self.arch = arch
+        self.kmod_group = kmod_group
         self.kmods_to_build = kmods_to_build
         self.containerfile_in_path = containerfile_in_path
 
@@ -10,10 +13,7 @@ class ContainerfileGenerator:
         with open(self.containerfile_in_path, 'r') as f:
             containerfile_in = f.read()
 
-        distro, version, arch, kmod_group = self.image_name.split('-')
-
-        # This is a simplified representation of the logic in the original scripts
-        # It will need to be expanded to handle all the different cases
+        # Use self.distro, self.version, self.arch, self.kmod_group directly
         kmod_install_commands = []
         for kmod in self.kmods_to_build:
             kmod_install_commands.append(f'/tmp/build-kmod.sh {kmod}')

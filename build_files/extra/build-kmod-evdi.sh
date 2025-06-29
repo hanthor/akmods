@@ -4,7 +4,7 @@ set -eoux pipefail
 
 RELEASE="$(rpm -E '%fedora')"
 
-if [[ "${FEDORA_MAJOR_VERSION}" -ge 42 ]]; then
+if [[ "${MAJOR_VERSION}" -ge 42 ]]; then
   if dnf search displaylink | grep -qv "displaylink"; then
     echo "Skipping build of evdi; displaylink net yet provided by negativo17"
     exit 0

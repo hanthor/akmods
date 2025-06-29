@@ -1,54 +1,68 @@
-platforms:
-  - amd64:
-      default: true
-      alt_name: x86_64
-  - amd64/v2:
-      default: false
-      alt_name: x86_64_v2
-  - arm64:
-      default: true
-      alt_name: aarch64
 distros:
-  centos:
-    image: quay.io/centos-bootc/centos-bootc
-    versions:
-      - stream10
-  almalinux-kitten:
-    image: quay.io/almalinuxorg/almalinux-bootc
-    versions:
-      - 10-kitten
-    extra_platforms: amd64/v2
   almalinux:
-    image: quay.io/almalinuxorg/almalinux-bootc
-    versions:
-      - 10
     extra_platforms: amd64/v2
-  fedora:
-    image: quay.io/fedora/fedora-bootc
+    image: quay.io/almalinuxorg/almalinux
+    latest_kernel_version: 6.12.0-55.9.1.el10_0.x86_64
     versions:
-      - 42
-      - rawhide
+    - 10
+  almalinux-kitten:
+    extra_platforms: amd64/v2
+    image: quay.io/almalinuxorg/almalinux
+    latest_kernel_version: 6.12.0-98.el10.x86_64
+    versions:
+    - 10
+  centos:
+    image: quay.io/centos/centos
+    kernel_flavors:
+      centos-hsk:
+      - centos-release-hyperscale-kernel
+    latest_kernel_version: 6.12.0-98.el10.x86_64
+    versions:
+    - 10
+  fedora:
+    image: quay.io/fedora/fedora
+    kernel_flavors:
+      asus:
+      - asus-kernel
+      bazzite:
+      - kernel-bazzite
+      surface:
+      - linux-surface
+    latest_kernel_version: 6.15.3-200.fc42.x86_64
+    versions:
+    - 42
+    - rawhide
 kmods:
   common:
-    - framework-laptop
-    - kvmfr
-    - openrazer
-    - v4l2loopback
-    - wl
-    - xone
+  - framework-laptop
+  - kvmfr
+  - openrazer
+  - v4l2loopback
+  - wl
+  - xone
   extra:
-    - ayaneo-platform
-    - ayn-platform
-    - bmi260
-    - evdi
-    - gcadapter_oc
-    - gpd-fan
-    - nct6687d
-    - ryzen-smu
-    - system76
-    - system76-io
-    - zenergy
+  - ayaneo-platform
+  - ayn-platform
+  - bmi260
+  - evdi
+  - gcadapter_oc
+  - gpd-fan
+  - nct6687d
+  - ryzen-smu
+  - system76
+  - system76-io
+  - zenergy
   nvidia:
-    - nvidia
+  - nvidia
   zfs:
-    - zfs
+  - zfs
+platforms:
+- amd64:
+    alt_name: x86_64
+    default: true
+- amd64/v2:
+    alt_name: x86_64_v2
+    default: false
+- arm64:
+    alt_name: aarch64
+    default: true

@@ -17,7 +17,7 @@ def meets_conditions(kmod, fedora_major_version, kernel_flavor, image_name):
         return True
 
     conditions = kmod['conditions']
-    if 'fedora_major_version_ge' in conditions and int(fedora_major_version.replace('stream', '')) < conditions['fedora_major_version_ge']:
+    if 'MAJOR_VERSION_ge' in conditions and fedora_major_version.isdigit() and int(fedora_major_version) < conditions['MAJOR_VERSION_ge']:
         return False
     if 'kernel_flavor_not_contains' in conditions and conditions['kernel_flavor_not_contains'] in kernel_flavor:
         return False

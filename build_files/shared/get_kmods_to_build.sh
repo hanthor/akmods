@@ -1,7 +1,7 @@
 #!/bin/bash
 
 KMOD_TYPE="$1"
-FEDORA_MAJOR_VERSION="$2"
+MAJOR_VERSION="$2"
 KERNEL_FLAVOR="$3"
 IMAGE_NAME="$4"
 
@@ -25,15 +25,15 @@ do
 
     # Evaluate conditions
     if [ "$CONDITIONS" != "null" ]; then
-        REQUIRED_FEDORA_VERSION_GE=$(echo "$CONDITIONS" | jq -r '.fedora_major_version_ge // "null"')
+        REQUIRED_MAJOR_VERSION_GE=$(echo "$CONDITIONS" | jq -r '.MAJOR_VERSION_ge // "null"')
         EXCLUDED_KERNEL_FLAVOR=$(echo "$CONDITIONS" | jq -r '.kernel_flavor_not_contains // "null"')
         REQUIRED_RELEASE_GE=$(echo "$CONDITIONS" | jq -r '.release_ge // "null"')
         COPR_RELEASE_RAWHIDE=$(echo "$CONDITIONS" | jq -r '.copr_release_rawhide // "false"')
         KERNEL_NOT_CONTAINS=$(echo "$CONDITIONS" | jq -r '.kernel_not_contains // "null"')
         DNF_SEARCH_DISPLAYLINK_NOT_FOUND=$(echo "$CONDITIONS" | jq -r '.dnf_search_displaylink_not_found // "false"')
 
-        if [ "$REQUIRED_FEDORA_VERSION_GE" != "null" ]; then
-            if [ "${FEDORA_MAJOR_VERSION}" -lt "${REQUIRED_FEDORA_VERSION_GE}" ]; then
+        if [ "$REQUIRED_MAJOR_VERSION_GE" != "null" ]; then
+            if [ "${MAJOR_VERSION}" -lt "${REQUIRED_MAJOR_VERSION_GE}" ]; then
                 BUILD=false
             fi
         fi
@@ -78,7 +78,7 @@ do
         KMODS_TO_BUILD+="$NAME "
 
         if [ "$COPR_URL" != "null" ] && [ "$COPR_REPO_FILE" != "null" ]; then
-            COPR_REPOS_ADD_INSTRUCTIONS+="RUN curl -fLO $(echo "$COPR_URL" | sed "s|\\\${RELEASE}|${FEDORA_MAJOR_VERSION}|g" | sed "s|\\\${COPR_RELEASE}|${FEDORA_MAJOR_VERSION}|g") -o /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/${COPR_REPO_FILE} && \\\n"
+            COPR_REPOS_ADD_INSTRUCTIONS+="RUN curl -fLO $(echo "$COPR_URL" | sed "s|\\\${RELEASE}|${MAJOR_VERSION}|g" | sed "s|\\\${COPR_RELEASE}|${MAJOR_VERSION}|g") -o /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/${COPR_REPO_FILE} && \\\n"
         fi
 
         DNF_INSTALL_COMMANDS+="dnf install -y akmod-$NAME && \\\n"

@@ -4,6 +4,48 @@ description: Schema for defining kernel modules and their build conditions.
 
 type: object
 properties:
+  platforms:
+    type: array
+    items:
+      type: object
+      patternProperties:
+        "^.*$":
+          type: object
+          properties:
+            default:
+              type: boolean
+            alt_name:
+              type: string
+          required:
+            - default
+            - alt_name
+  distros:
+    type: object
+    patternProperties:
+      "^.*$":
+        type: object
+        properties:
+          image:
+            type: string
+          versions:
+            type: array
+            items:
+              type: ["string", "integer"]
+          extra_platforms:
+            type: string
+          kernel_flavors:
+            type: object
+            patternProperties:
+              "^.*$":
+                type: array
+                items:
+                  type: string
+          latest_kernel_version:
+            type: string
+            description: Cached latest kernel version for this distro and version.
+        required:
+          - image
+          - versions
   kmods:
     type: object
     description: Defines different categories of kernel modules.
@@ -12,24 +54,24 @@ properties:
         type: array
         description: List of common kernel modules.
         items:
-          $ref: '#/definitions/kmodEntry'
+          type: string
       extra:
         type: array
         description: List of extra kernel modules.
         items:
-          $ref: '#/definitions/kmodEntry'
+          type: string
       nvidia:
         type: array
         description: List of NVIDIA kernel modules.
         items:
-          $ref: '#/definitions/kmodEntry'
+          type: string
       zfs:
         type: array
         description: List of ZFS kernel modules.
         items:
-          $ref: '#/definitions/kmodEntry'
+          type: string
     additionalProperties: false
-  
+
 definitions:
   kmodEntry:
     type: object
@@ -60,7 +102,7 @@ definitions:
           copr_release_rawhide:
             type: boolean
             description: Indicates if COPR release should be rawhide.
-          fedora_major_version_ge:
+          MAJOR_VERSION_ge:
             type: integer
             description: Minimum Fedora major version for building.
           dnf_search_displaylink_not_found:

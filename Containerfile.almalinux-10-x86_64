@@ -1,0 +1,71 @@
+FROM quay.io/almalinuxorg/almalinux:10 AS builder
+
+# Install necessary tools
+RUN dnf install -y --setopt=install_weak_deps=False dnf-plugins-core openssl rpmrebuild sbsigntools
+
+# Conditionally enable CRB and install EPEL for CentOS
+RUN if [ "almalinux" = "centos" ]; then         dnf config-manager --set-enabled crb;         CENTOS_VER=$(rpm -E %centos);         dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${CENTOS_VER}.noarch.rpm;     fi
+
+# Copy certs and build scripts
+COPY certs /tmp/certs
+COPY build_files/shared /tmp/shared_scripts
+
+# Fetch, sign, and package kernel
+RUN /tmp/shared_scripts/kernel_manager.py     --kcwd /tmp     --kernel-version 6.12.0-55.9.1.el10_0.x86_64     --kernel-flavor main     --builder-base quay.io/almalinuxorg/almalinux:10     --distro almalinux     --sign-and-package
+
+FROM builder AS kmod_builder_common
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmods for common group
+RUN /tmp/shared_scripts/build-kmod.sh framework-laptop
+RUN /tmp/shared_scripts/build-kmod.sh kvmfr
+RUN /tmp/shared_scripts/build-kmod.sh openrazer
+RUN /tmp/shared_scripts/build-kmod.sh v4l2loopback
+RUN /tmp/shared_scripts/build-kmod.sh wl
+RUN /tmp/shared_scripts/build-kmod.sh xone
+
+FROM kmod_builder_common AS kmod_builder_extra
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmods for extra group
+RUN /tmp/shared_scripts/build-kmod.sh ayaneo-platform
+RUN /tmp/shared_scripts/build-kmod.sh ayn-platform
+RUN /tmp/shared_scripts/build-kmod.sh bmi260
+RUN /tmp/shared_scripts/build-kmod.sh evdi
+RUN /tmp/shared_scripts/build-kmod.sh facetimehd
+RUN /tmp/shared_scripts/build-kmod.sh gcadapter_oc
+RUN /tmp/shared_scripts/build-kmod.sh gpd-fan
+RUN /tmp/shared_scripts/build-kmod.sh nct6687d
+RUN /tmp/shared_scripts/build-kmod.sh rtl8814au
+RUN /tmp/shared_scripts/build-kmod.sh rtl88xxau
+RUN /tmp/shared_scripts/build-kmod.sh ryzen-smu
+RUN /tmp/shared_scripts/build-kmod.sh system76-io
+RUN /tmp/shared_scripts/build-kmod.sh system76
+RUN /tmp/shared_scripts/build-kmod.sh vhba
+RUN /tmp/shared_scripts/build-kmod.sh VirtualBox
+RUN /tmp/shared_scripts/build-kmod.sh zenergy
+
+FROM kmod_builder_extra AS kmod_builder_nvidia
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmods for nvidia group
+RUN /tmp/shared_scripts/build-kmod.sh nvidia
+
+FROM kmod_builder_nvidia AS kmod_builder_zfs
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmods for zfs group
+RUN /tmp/shared_scripts/build-kmod.sh zfs
+
+FROM scratch
+
+COPY --from=builder /tmp/kernel_cache /kernel_rpms
+COPY --from=kmod_builder_zfs /var/cache/akmods /kmod_rpms
