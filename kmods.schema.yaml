@@ -1,0 +1,121 @@
+$schema: http://json-schema.org/draft-07/schema#
+title: Kmods Configuration Schema
+description: Schema for defining kernel modules and their build conditions.
+
+type: object
+properties:
+  platforms:
+    type: array
+    items:
+      type: object
+      patternProperties:
+        "^.*$":
+          type: object
+          properties:
+            default:
+              type: boolean
+            alt_name:
+              type: string
+          required:
+            - default
+            - alt_name
+  distros:
+    type: object
+    patternProperties:
+      "^.*$":
+        type: object
+        properties:
+          image:
+            type: string
+          versions:
+            type: array
+            items:
+              type: ["string", "integer"]
+          extra_platforms:
+            type: string
+          kernel_flavors:
+            type: object
+            patternProperties:
+              "^.*$":
+                type: array
+                items:
+                  type: string
+          latest_kernel_version:
+            type: string
+            description: Cached latest kernel version for this distro and version.
+        required:
+          - image
+          - versions
+  kmods:
+    type: object
+    description: Defines different categories of kernel modules.
+    properties:
+      common:
+        type: array
+        description: List of common kernel modules.
+        items:
+          type: string
+      extra:
+        type: array
+        description: List of extra kernel modules.
+        items:
+          type: string
+      nvidia:
+        type: array
+        description: List of NVIDIA kernel modules.
+        items:
+          type: string
+      zfs:
+        type: array
+        description: List of ZFS kernel modules.
+        items:
+          type: string
+    additionalProperties: false
+
+definitions:
+  kmodEntry:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        description: The name of the kernel module.
+      copr_url:
+        type: string
+        description: Optional COPR repository URL for the module.
+      copr_repo_file:
+        type: string
+        description: Optional COPR repository file name.
+      mod_files:
+        type: array
+        description: List of module files to check with modinfo.
+        items:
+          type: string
+      conditions:
+        type: object
+        description: Conditions under which this module should be built.
+        properties:
+          release_ge:
+            type: integer
+            description: Minimum Fedora release version for building.
+          copr_release_rawhide:
+            type: boolean
+            description: Indicates if COPR release should be rawhide.
+          MAJOR_VERSION_ge:
+            type: integer
+            description: Minimum Fedora major version for building.
+          dnf_search_displaylink_not_found:
+            type: boolean
+            description: Condition based on dnf search for displaylink.
+          kernel_flavor_not_contains:
+            type: string
+            description: Kernel flavor that should NOT contain this string.
+          kernel_not_contains:
+            type: string
+            description: Kernel version that should NOT contain this string.
+        additionalProperties: false
+      cflags:
+        type: string
+        description: Optional CFLAGS to apply during build.
+    additionalProperties: false

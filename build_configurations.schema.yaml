@@ -1,0 +1,109 @@
+$schema: http://json-schema.org/draft-07/schema#
+title: Build Configurations Schema
+description: Schema for defining build configurations including distros, platforms, and kmod groups.
+type: object
+properties:
+  platforms:
+    type: array
+    description: List of supported platforms/architectures.
+    items:
+      type: object
+      patternProperties:
+        "^[a-zA-Z0-9/_-]+$":
+          type: object
+          properties:
+            default:
+              type: boolean
+              description: Indicates if this is the default platform.
+            alt_name:
+              type: string
+              description: Alternative name for the platform.
+          required:
+            - default
+            - alt_name
+      additionalProperties: false
+  distros:
+    type: object
+    description: Defines supported distributions and their versions.
+    properties:
+      centos:
+        type: object
+        properties:
+          image:
+            type: string
+            description: Base image for CentOS.
+          versions:
+            type: array
+            items:
+              type: string
+            description: List of CentOS versions.
+        required:
+          - image
+          - versions
+      almalinux:
+        type: object
+        properties:
+          image:
+            type: string
+            description: Base image for AlmaLinux.
+          versions:
+            type: array
+            items:
+              type: string
+            description: List of AlmaLinux versions.
+          extra_platforms:
+            type: string
+            description: Comma-separated list of extra platforms for AlmaLinux.
+        required:
+          - image
+          - versions
+      almalinux-kitten:
+        type: object
+        properties:
+          image:
+            type: string
+            description: Base image for AlmaLinux Kitten.
+          versions:
+            type: array
+            items:
+              type: string
+            description: List of AlmaLinux Kitten versions.
+          extra_platforms:
+            type: string
+            description: Comma-separated list of extra platforms for AlmaLinux Kitten.
+        required:
+          - image
+          - versions
+      fedora:
+        type: object
+        properties:
+          image:
+            type: string
+            description: Base image for Fedora.
+          versions:
+            type: array
+            items:
+              type: string
+            description: List of Fedora versions.
+        required:
+          - image
+          - versions
+    required:
+      - centos
+      - almalinux
+      - almalinux-kitten
+      - fedora
+  kmods:
+    type: object
+    description: Defines kmod packages within different groups.
+    patternProperties:
+      "^[a-zA-Z0-9_-]+$":
+        type: array
+        items:
+          type: string
+    additionalProperties: false
+required:
+  - platforms
+  - distros
+  - kmods
+additionalProperties: false

@@ -1,69 +1,21 @@
 # ublue-os akmods
 
-[![build-bazzite](https://github.com/ublue-os/akmods/actions/workflows/build-bazzite.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-bazzite.yml) [![build-41](https://github.com/ublue-os/akmods/actions/workflows/build-41.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-41.yml) [![build-42](https://github.com/ublue-os/akmods/actions/workflows/build-42.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-42.yml)
-
 OCI images providing a set of cached kernel RPMs and extra kernel modules to Universal Blue images. Used for better hardware support and consistent build process.
 
 ## How it's organized
 
-The [`akmods` image](https://github.com/orgs/ublue-os/packages/container/package/akmods) is built and published daily. However, there's not a single image but several, given various kernels we now support.
+The `akmods` images are built and published daily. The build matrix, defining combinations of distributions, platforms, and kmod groups, is configured in `build_configurations.yaml`.
 
-The akmods packages are divided up for building in a few different "groups":
-
-- `common` - any kmod installed by default in Bluefin/Aurora (or were originally in main images pre-Fedora 39)
-- `extra` - any kmods used by Bazzite but not Bluefine/Aurora
-- `nvidia` - only the nvidia proprietary kmod and addons
-- `nvidia-open` - only the nvidia-open kmod and addons
-- `zfs` - only the zfs kmod and utilities built for select kernels
-
-Each of these images contains a cached copy of the respective kernel RPMs compatible with the respective kmods for the image.
-
-Builds also run for different kernels:
-
-- `bazzite` - Bazzite [builds a kernel with gaming specific patches](https://github.com/bazzite-org/kernel-bazzite) for the current release of Fedora
-- `ublue 41` - Fedora 41 kernel builds:
-  - `main` - current default kernel version
-  - `coreos-stable` - current Fedora CoreOS stable kernel version
-  - `coreos-testing` - current Fedora CoreOS testing kernel version
-- `ublue 42` - Fedora 42 kernel builds:
-  - `main` - current default kernel version
-  - `coreos-stable` - current Fedora CoreOS stable kernel version
-  - `coreos-testing` - current Fedora CoreOS testing kernel version
-
-This table shows what groups build for which kernel and Fedora release:
-
-| Build | Kernel | akmods group |
-|-------|--------|--------------|
-| bazzite | bazzite | common |
-| bazzite | bazzite | extra |
-| bazzite | bazzite | nvidia |
-| bazzite | bazzite | nvidia-open |
-| 41 | main | common |
-| 41 | main | nvidia |
-| 41 | main | nvidia-open |
-| 41 | coreos-stable | common |
-| 41 | coreos-stable | nvidia |
-| 41 | coreos-stable | nvidia-open |
-| 41 | coreos-stable | zfs |
-| 42 | main | common |
-| 42 | main | nvidia |
-| 42 | main | nvidia-open |
-| 42 | coreos-stable | common |
-| 42 | coreos-stable | nvidia |
-| 42 | coreos-stable | nvidia-open |
-| 42 | coreos-stable | zfs |
+Each image is tailored for specific kernel flavors and kmod groups, as defined in `kmods.yaml`
 
 ## Features
 
 ### Overview
 
-The `common` images contain related kmod packages, plus:
+The images contain relevant kmod packages and support packages:
 
 - `ublue-os-akmods-addons` - installs extra repos and our kmods signing key; install and import to allow SecureBoot systems to use these kmods
 - `ublue-os-ucore-addons` - a slightly lighter `ublue-os-akmods-addons` for CoreOS/uCore systems
-
-The `nvidia` and `nvidia-open` images contains
-
 - `ublue-os-nvidia-addons` - installs extra repos enabling our nvidia support
   - [nvidia container selinux policy](https://github.com/NVIDIA/dgx-selinux/tree/master/src/nvidia-container-selinux) - uses RHEL9 policy as the closest match
   - [nvidia-container-tookkit repo](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installing-with-yum-or-dnf) - version 1.14 (and newer) provide CDI for podman use of nvidia gpus
@@ -120,25 +72,16 @@ We build both the open and closed drivers from NVIDIA. The open driver is the on
 
 To install one of these kmods, you'll need to install any of their specific dependencies (checkout the `build-prep.sh` and the specific `build-FOO.sh` script for details), and ensure you are on a compatible kernel.
 
-Using common images as an example, add something like this to your Containerfile, replacing `TAG` with the appropriate tag for the image:
+To build the OCI images, use the `build.py` script:
 
-    COPY --from=ghcr.io/ublue-os/akmods:TAG / /tmp/akmods-common
-    RUN find /tmp/akmods-common
-    ## optionally install remove old and install new kernel
-    # dnf -y remove --no-autoremove kernel kernel-core kernel-modules kernel-modules-core kernel-modules-extra
-    ## install ublue support package and desired kmod(s)
-    RUN dnf install /tmp/rpms/ublue-os/ublue-os-akmods*.rpm
-    RUN dnf install /tmp/rpms/kmods/kmod-v4l2loopback*.rpm
+```bash
+python build.py --kernel-version <KERNEL_VERSION> --kernel-flavor <KERNEL_FLAVOR> [--images <IMAGE_NAME> ...] [--dry-run]
+```
 
-For NVIDIA images, add something like this to your Containerfile, replacing `TAG` with the appropriate tag for the image:
-
-    COPY --from=ghcr.io/ublue-os/akmods-nvidia:TAG / /tmp/akmods-nvidia
-    RUN find /tmp/akmods-nvidia
-    ## optionally install remove old and install new kernel
-    # dnf -y remove --no-autoremove kernel kernel-core kernel-modules kernel-modules-core kernel-modules-extra
-    ## install ublue support package and desired kmod(s)
-    RUN rpm-ostree install /tmp/rpms/ublue-os/ublue-os-nvidia*.rpm
-    RUN rpm-ostree install /tmp/rpms/kmods/kmod-nvidia*.rpm
+- `<KERNEL_VERSION>`: The full kernel version string (e.g., `6.9.0-1.fc41.x86_64`).
+- `<KERNEL_FLAVOR>`: The kernel flavor (e.g., `main`, `asus`, `surface`). Defaults to `main`.
+- `<IMAGE_NAME>`: (Optional) One or more specific image names to build (e.g., `fedora-41-x86_64-common`). If not specified, all images defined in `build_configurations.yaml` will be built.
+- `--dry-run`: (Optional) Perform a dry run without executing `podman` commands.
 
 ## Verification
 

@@ -1,0 +1,216 @@
+FROM quay.io/almalinuxorg/almalinux:10-kitten AS builder
+
+# Install necessary tools
+RUN dnf install -y --setopt=install_weak_deps=False dnf-plugins-core openssl rpmrebuild sbsigntools
+
+# Conditionally enable CRB and install EPEL for CentOS
+RUN if [ "almalinux-kitten" = "centos" ]; then         dnf config-manager --set-enabled crb;         CENTOS_VER=$(rpm -E %centos);         dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${CENTOS_VER}.noarch.rpm;     fi
+
+# Copy certs and build scripts
+COPY certs /tmp/certs
+COPY build_files/shared /tmp/shared_scripts
+
+# Fetch, sign, and package kernel
+RUN /tmp/shared_scripts/kernel_manager.py     --kcwd /tmp     --kernel-version 6.12.0-98.el10.x86_64     --kernel-flavor main     --builder-base quay.io/almalinuxorg/almalinux:10-kitten     --distro almalinux-kitten     --sign-and-package
+
+FROM builder AS kmod_builder_framework-laptop
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh framework-laptop
+
+FROM builder AS kmod_builder_kvmfr
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh kvmfr
+
+FROM builder AS kmod_builder_openrazer
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh openrazer
+
+FROM builder AS kmod_builder_v4l2loopback
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh v4l2loopback
+
+FROM builder AS kmod_builder_wl
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh wl
+
+FROM builder AS kmod_builder_xone
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh xone
+
+FROM builder AS kmod_builder_ayaneo-platform
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh ayaneo-platform
+
+FROM builder AS kmod_builder_ayn-platform
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh ayn-platform
+
+FROM builder AS kmod_builder_bmi260
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh bmi260
+
+FROM builder AS kmod_builder_facetimehd
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh facetimehd
+
+FROM builder AS kmod_builder_gcadapter_oc
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh gcadapter_oc
+
+FROM builder AS kmod_builder_nct6687d
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh nct6687d
+
+FROM builder AS kmod_builder_rtl8814au
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh rtl8814au
+
+FROM builder AS kmod_builder_rtl88xxau
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh rtl88xxau
+
+FROM builder AS kmod_builder_ryzen-smu
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh ryzen-smu
+
+FROM builder AS kmod_builder_system76-io
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh system76-io
+
+FROM builder AS kmod_builder_system76
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh system76
+
+FROM builder AS kmod_builder_vhba
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh vhba
+
+FROM builder AS kmod_builder_VirtualBox
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh VirtualBox
+
+FROM builder AS kmod_builder_zenergy
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh zenergy
+
+FROM builder AS kmod_builder_nvidia
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh nvidia
+
+FROM builder AS kmod_builder_zfs
+
+# Copy shared build scripts
+COPY build_files/shared /tmp/shared_scripts
+
+# Build kmod using the generic script
+RUN /tmp/shared_scripts/build-kmod.sh zfs
+
+FROM scratch
+
+COPY --from=builder /tmp/kernel_cache /kernel_rpms
+COPY --from=kmod_builder_framework-laptop /var/cache/akmods /kmod_rpms_framework-laptop
+COPY --from=kmod_builder_kvmfr /var/cache/akmods /kmod_rpms_kvmfr
+COPY --from=kmod_builder_openrazer /var/cache/akmods /kmod_rpms_openrazer
+COPY --from=kmod_builder_v4l2loopback /var/cache/akmods /kmod_rpms_v4l2loopback
+COPY --from=kmod_builder_wl /var/cache/akmods /kmod_rpms_wl
+COPY --from=kmod_builder_xone /var/cache/akmods /kmod_rpms_xone
+COPY --from=kmod_builder_ayaneo-platform /var/cache/akmods /kmod_rpms_ayaneo-platform
+COPY --from=kmod_builder_ayn-platform /var/cache/akmods /kmod_rpms_ayn-platform
+COPY --from=kmod_builder_bmi260 /var/cache/akmods /kmod_rpms_bmi260
+COPY --from=kmod_builder_facetimehd /var/cache/akmods /kmod_rpms_facetimehd
+COPY --from=kmod_builder_gcadapter_oc /var/cache/akmods /kmod_rpms_gcadapter_oc
+COPY --from=kmod_builder_nct6687d /var/cache/akmods /kmod_rpms_nct6687d
+COPY --from=kmod_builder_rtl8814au /var/cache/akmods /kmod_rpms_rtl8814au
+COPY --from=kmod_builder_rtl88xxau /var/cache/akmods /kmod_rpms_rtl88xxau
+COPY --from=kmod_builder_ryzen-smu /var/cache/akmods /kmod_rpms_ryzen-smu
+COPY --from=kmod_builder_system76-io /var/cache/akmods /kmod_rpms_system76-io
+COPY --from=kmod_builder_system76 /var/cache/akmods /kmod_rpms_system76
+COPY --from=kmod_builder_vhba /var/cache/akmods /kmod_rpms_vhba
+COPY --from=kmod_builder_VirtualBox /var/cache/akmods /kmod_rpms_VirtualBox
+COPY --from=kmod_builder_zenergy /var/cache/akmods /kmod_rpms_zenergy
+COPY --from=kmod_builder_nvidia /var/cache/akmods /kmod_rpms_nvidia
+COPY --from=kmod_builder_zfs /var/cache/akmods /kmod_rpms_zfs

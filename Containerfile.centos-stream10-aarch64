@@ -1,0 +1,54 @@
+FROM quay.io/centos/centos:stream10 AS builder
+
+# Install necessary tools
+RUN dnf install -y --setopt=install_weak_deps=False dnf-plugins-core openssl rpmrebuild sbsigntools
+
+# Conditionally enable CRB and install EPEL for CentOS
+RUN if [ "centos" = "centos" ]; then         dnf config-manager --set-enabled crb;         CENTOS_VER=$(rpm -E %centos);         dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${CENTOS_VER}.noarch.rpm;     fi
+
+# Copy certs and build scripts
+COPY certs /tmp/certs
+COPY build_files/shared /tmp/shared_scripts
+
+# Fetch, sign, and package kernel
+RUN /tmp/shared_scripts/kernel_manager.py     --kcwd /tmp     --kernel-version 6.12.0-98.el10.x86_64     --kernel-flavor main     --builder-base quay.io/centos/centos:stream10     --distro centos     --sign-and-package
+
+FROM builder AS kmod_builder_common
+
+# Copy kmod specific build files
+COPY build_files/common /tmp/common_scripts
+
+# Build kmod
+RUN /tmp/common_scripts/build-kmod-common.sh
+
+FROM builder AS kmod_builder_extra
+
+# Copy kmod specific build files
+COPY build_files/extra /tmp/extra_scripts
+
+# Build kmod
+RUN /tmp/extra_scripts/build-kmod-extra.sh
+
+FROM builder AS kmod_builder_nvidia
+
+# Copy kmod specific build files
+COPY build_files/nvidia /tmp/nvidia_scripts
+
+# Build kmod
+RUN /tmp/nvidia_scripts/build-kmod-nvidia.sh
+
+FROM builder AS kmod_builder_zfs
+
+# Copy kmod specific build files
+COPY build_files/zfs /tmp/zfs_scripts
+
+# Build kmod
+RUN /tmp/zfs_scripts/build-kmod-zfs.sh
+
+FROM scratch
+
+COPY --from=builder /tmp/kernel_cache /kernel_rpms
+COPY --from=kmod_builder_common /var/cache/akmods /kmod_rpms_common
+COPY --from=kmod_builder_extra /var/cache/akmods /kmod_rpms_extra
+COPY --from=kmod_builder_nvidia /var/cache/akmods /kmod_rpms_nvidia
+COPY --from=kmod_builder_zfs /var/cache/akmods /kmod_rpms_zfs
