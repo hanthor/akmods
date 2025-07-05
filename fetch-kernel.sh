@@ -86,8 +86,7 @@ elif [[ "${kernel_flavor}" == "bazzite" ]]; then
     # curl -LO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-addons-"$kernel_version".rpm
 elif [[ "${kernel_flavor}" == "almakitten" ]]; then
     # Using curl instead of dnf download for https links
-    curl -#fLO http://linuxsoft.cern.ch/almalinux-kitten/$CENTOS_VER-kitten/AppStream/"$ARCH"/os/
-    curl -#fLO http://linuxsoft.cern.ch/almalinux-kitten/$CENTOS_VER-kitten/AppStream/"$ARCH"/os/Packages/kernel-"$kernel_version".rpm
+    curl -#fLO http://linuxsoft.cern.ch/almalinux-kitten/$CENTOS_VER-kitten/BaseOS/"$ARCH"/os/Packages/kernel-"$kernel_version".rpm
     curl -#fLO http://linuxsoft.cern.ch/almalinux-kitten/$CENTOS_VER-kitten/BaseOS/"$ARCH"/os/Packages/kernel-core-"$kernel_version".rpm
     curl -#fLO http://linuxsoft.cern.ch/almalinux-kitten/$CENTOS_VER-kitten/BaseOS/"$ARCH"/os/Packages/kernel-modules-"$kernel_version".rpm
     curl -#fLO http://linuxsoft.cern.ch/almalinux-kitten/$CENTOS_VER-kitten/BaseOS/"$ARCH"/os/Packages/kernel-modules-core-"$kernel_version".rpm
