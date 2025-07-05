@@ -1,13 +1,13 @@
-name: ublue akmods centos
+name: ublue akmods almakitten
 on:
   merge_group:
   pull_request:
     branches:
       - main
     paths-ignore:
-      - '**.md'
+      - "**.md"
   schedule:
-    - cron: '5 0 * * *'  # 0005 UTC everyday
+    - cron: "5 0 * * *" # 0005 UTC everyday
   workflow_dispatch:
 
 jobs:
@@ -18,8 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         kernel_flavor:
-          - centos
-          - centos-hsk
+          - almakitten
         fedora_version:
           - stream10
           - stream9

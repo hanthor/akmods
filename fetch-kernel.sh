@@ -13,8 +13,8 @@ build_tag="${KERNEL_BUILD_TAG:-latest}"
 ARCH=$(uname -m)
 
 dnf install -y --setopt=install_weak_deps=False dnf-plugins-core openssl
-if [[ "$kernel_flavor" =~ "centos" ]]; then
-    CENTOS_VER=$(rpm -E %centos)
+if [[ "$kernel_flavor" =~ "almakitten" ]]; then
+    CENTOS_VER=$(rpm -E %almalinux)
     dnf config-manager --set-enabled crb
     dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${CENTOS_VER}.noarch.rpm
 fi
@@ -37,7 +37,7 @@ case "$kernel_flavor" in
         ;;
     "bazzite")
         ;;
-    "centos")
+    "almakitten")
         ;;
     "centos-hsk")
         ;;
@@ -84,16 +84,17 @@ elif [[ "${kernel_flavor}" == "bazzite" ]]; then
     curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-devel-matched-"$kernel_version".rpm
     curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-"$kernel_version".rpm
     # curl -LO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-addons-"$kernel_version".rpm
-elif [[ "${kernel_flavor}" == "centos" ]]; then
+elif [[ "${kernel_flavor}" == "almakitten" ]]; then
     # Using curl instead of dnf download for https links
-    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-"$kernel_version".rpm
-    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-core-"$kernel_version".rpm
-    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-modules-"$kernel_version".rpm
-    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-modules-core-"$kernel_version".rpm
-    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-modules-extra-"$kernel_version".rpm
-    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-uki-virt-"$kernel_version".rpm
-    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/AppStream/"$ARCH"/os/Packages/kernel-devel-"$kernel_version".rpm
-    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/AppStream/"$ARCH"/os/Packages/kernel-devel-matched-"$kernel_version".rpm
+    curl -#fLO http://linuxsoft.cern.ch/almalinux-kitten/$CENTOS_VER-kitten/AppStream/"$ARCH"/os/
+    curl -#fLO http://linuxsoft.cern.ch/almalinux-kitten/$CENTOS_VER-kitten/AppStream/"$ARCH"/os/Packages/kernel-"$kernel_version".rpm
+    curl -#fLO http://linuxsoft.cern.ch/almalinux-kitten/$CENTOS_VER-kitten/BaseOS/"$ARCH"/os/Packages/kernel-core-"$kernel_version".rpm
+    curl -#fLO http://linuxsoft.cern.ch/almalinux-kitten/$CENTOS_VER-kitten/BaseOS/"$ARCH"/os/Packages/kernel-modules-"$kernel_version".rpm
+    curl -#fLO http://linuxsoft.cern.ch/almalinux-kitten/$CENTOS_VER-kitten/BaseOS/"$ARCH"/os/Packages/kernel-modules-core-"$kernel_version".rpm
+    curl -#fLO http://linuxsoft.cern.ch/almalinux-kitten/$CENTOS_VER-kitten/BaseOS/"$ARCH"/os/Packages/kernel-modules-extra-"$kernel_version".rpm
+    curl -#fLO http://linuxsoft.cern.ch/almalinux-kitten/$CENTOS_VER-kitten/BaseOS/"$ARCH"/os/Packages/kernel-uki-virt-"$kernel_version".rpm
+    curl -#fLO http://linuxsoft.cern.ch/almalinux-kitten/$CENTOS_VER-kitten/AppStream/"$ARCH"/os/Packages/kernel-devel-"$kernel_version".rpm
+    curl -#fLO http://linuxsoft.cern.ch/almalinux-kitten/$CENTOS_VER-kitten/AppStream/"$ARCH"/os/Packages/kernel-devel-matched-"$kernel_version".rpm
 elif [[ "${kernel_flavor}" == "centos-hsk" ]]; then
     dnf -y install centos-release-hyperscale-kernel
     dnf download -y --enablerepo="centos-hyperscale" \
@@ -117,7 +118,7 @@ elif [[ "${kernel_flavor}" =~ "longterm" ]]; then
 else
     KERNEL_MAJOR_MINOR_PATCH=$(echo "$kernel_version" | cut -d '-' -f 1)
     KERNEL_RELEASE="$(echo "$kernel_version" | cut -d - -f 2 | rev | cut -d . -f 2- | rev)"
-    
+
     # Using curl instead of dnf download for https links
     curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-"$kernel_version".rpm
     curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-modules-"$kernel_version".rpm
@@ -164,7 +165,7 @@ elif [[ "${kernel_flavor}" == "bazzite" ]]; then
         /kernel-modules-"$kernel_version".rpm \
         /kernel-modules-core-"$kernel_version".rpm \
         /kernel-modules-extra-"$kernel_version".rpm
-elif [[ "${kernel_flavor}" =~ "centos" ]]; then
+elif [[ "${kernel_flavor}" =~ "almakitten" ]]; then
     dnf install -y \
         /kernel-"$kernel_version".rpm \
         /kernel-core-"$kernel_version".rpm \
@@ -188,7 +189,7 @@ else
 fi
 
 # Strip Signatures from non-fedora Kernels
-if [[ ${kernel_flavor} =~ main|coreos|centos ]]; then
+if [[ ${kernel_flavor} =~ main|coreos|almakitten ]]; then
     echo "Will not strip Fedora/CentOS signature(s) from ${kernel_flavor} kernel."
 else
     EXISTING_SIGNATURES="$(sbverify --list /usr/lib/modules/"$kernel_version"/vmlinuz | grep '^signature \([0-9]\+\)$' | sed 's/^signature \([0-9]\+\)$/\1/')" || true

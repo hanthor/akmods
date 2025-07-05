@@ -76,8 +76,8 @@ jobs:
         if: steps.cache-kernel.outputs.cache-hit != 'true'
         shell: bash
         run: |
-          if [[ ${{ inputs.kernel_flavor }} =~ centos ]]; then
-            build_image="quay.io/centos/centos:${{ inputs.fedora_version }}"
+          if [[ ${{ inputs.kernel_flavor }} =~ almakitten ]]; then
+            build_image="quay.io/almalinuxorg/almalinux:${{ inputs.fedora_version }}"
           else
             build_image="quay.io/fedora/fedora:${{ inputs.fedora_version }}"
           fi
@@ -158,7 +158,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kernel_flavor:  # this must be in matrix for excludes, but reference inputs.kernel_flavor in workflow
+        kernel_flavor: # this must be in matrix for excludes, but reference inputs.kernel_flavor in workflow
           - ${{ inputs.kernel_flavor }}
         cfile_suffix:
           - common
@@ -182,11 +182,11 @@ jobs:
           - kernel_flavor: bazzite
             cfile_suffix: zfs
           # centos
-          - kernel_flavor: centos
+          - kernel_flavor: almakitten
             cfile_suffix: common
           - kernel_flavor: centos-hsk
             cfile_suffix: common
-          - kernel_flavor: centos
+          - kernel_flavor: almakitten
             cfile_suffix: extra
           - kernel_flavor: centos-hsk
             cfile_suffix: extra
@@ -246,8 +246,8 @@ jobs:
           else
               echo "IMAGE_NAME=${{ env.IMAGE_BASE_NAME }}-${{ matrix.cfile_suffix }}" >> $GITHUB_ENV
           fi
-          if [[ ${{ inputs.kernel_flavor }} =~ "centos" ]]; then
-            build_image="quay.io/centos/centos"
+          if [[ ${{ inputs.kernel_flavor }} =~ "almakitten" ]]; then
+            build_image="quay.io/almalinuxorg/almalinux"
           else
             build_image="quay.io/fedora/fedora"
           fi

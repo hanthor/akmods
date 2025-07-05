@@ -32,9 +32,9 @@ runs:
       run: |
         set -x
 
-        if [[ ${{ inputs.kernel_flavor }} =~ asus|surface|centos|longterm ]]; then
-          if [[ ${{ inputs.kernel_flavor }} =~ centos ]]; then
-            build_image="quay.io/centos/centos:${{ inputs.fedora_version }}"
+        if [[ ${{ inputs.kernel_flavor }} =~ asus|surface|almakitten|longterm ]]; then
+          if [[ ${{ inputs.kernel_flavor }} =~ almakitten ]]; then
+            build_image="quay.io/almalinuxorg/almalinux:${{ inputs.fedora_version }}"
           else
             build_image="quay.io/fedora/fedora:${{ inputs.fedora_version }}"
           fi
@@ -100,7 +100,7 @@ runs:
             $dnf copr enable -y lukenukem/asus-kernel
             linux=$($dnf repoquery --repoid copr:copr.fedorainfracloud.org:lukenukem:asus-kernel --whatprovides kernel | sort -V | tail -n1 | sed 's/.*://')
             ;;
-          "centos")
+          "almakitten")
             linux=$($dnf repoquery --whatprovides kernel | sort -V | tail -n1 | sed 's/.*://')
             ;;
           "centos-hsk")
@@ -164,4 +164,3 @@ runs:
           echo "build_tag=${build_tag}" >> $GITHUB_OUTPUT
           echo "major_minor_patch=${kernel_major_minor_patch}" >> $GITHUB_OUTPUT
           echo "release=${linux}" >> $GITHUB_OUTPUT
-

@@ -4,8 +4,8 @@
 set -oeux pipefail
 
 ### PREPARE REPOS
-if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
-    echo "Building for CentOS"
+if [[ "${KERNEL_FLAVOR}" =~ "almakitten" ]]; then
+    echo "Building for almalinux kitten"
     RELEASE="$(rpm -E '%centos')"
     NVIDIA_REPO_NAME="epel-nvidia.repo"
     NVIDIA_EXTRA_PKGS=""
@@ -39,8 +39,8 @@ dnf install -y /tmp/kernel_cache/*.rpm
 
 KERNEL_VERSION=$(rpm -q ${KERNEL_NAME}|cut -d '-' -f2-)
 
-if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
-    echo "Building for CentOS does not require more repos"
+if [[ "${KERNEL_FLAVOR}" =~ "almakitten" ]]; then
+    echo "Building for Almalinux Kitten does not require more repos"
 else
     echo "Building for Fedora requires more repo setup"
     # enable more repos

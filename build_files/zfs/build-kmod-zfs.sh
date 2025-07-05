@@ -5,8 +5,8 @@ set -oeux pipefail
 
 ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q ${KERNEL_NAME} --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
-if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
-    RELEASE="$(rpm -E '%centos')"
+if [[ "${KERNEL_FLAVOR}" =~ "almakitten" ]]; then
+    RELEASE="$(rpm -E '%almalinux')"
 else
     RELEASE="$(rpm -E '%fedora')"
 fi

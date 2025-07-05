@@ -5,8 +5,8 @@ set -oeux pipefail
 ARCH="$(rpm -E '%_arch')"
 KERNEL_MODULE_TYPE="${1:-kernel}"
 
-if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
-    DIST="el$(rpm -E '%centos')"
+if [[ "${KERNEL_FLAVOR}" =~ "almakitten" ]]; then
+    DIST="el$(rpm -E '%almalinux')"
     # on CentOS, akmods uses full kernel version and release but no arch
     VARS_KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}')"
     # enable negativo17
